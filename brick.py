@@ -6,7 +6,7 @@ class bricks:
         self.HEIGHT = 30
         self.PADDING = 10
         self.ROWS = 6
-        self.COLS = 20
+        self.COLS = 16
         self.LEFT_MARGIN = 50
         self.TOP_MARGIN = 50
         self.color = [(0,255,255),(255,0,255),(255,255,0)]
@@ -24,9 +24,11 @@ class bricks:
                     "active": True,
                     "powerup": None
                 })
-                if random.random() < 0.1:
+                if random.random() > 0.9:
                     power = random.choice(self.powerups)
                     self.bricks[-1]["powerup"] = power
+                    self.bricks[-1]["color"] = (92, 46, 166)
+                    # print(power)
 
     def draw(self, screen):
         for brick in self.bricks:

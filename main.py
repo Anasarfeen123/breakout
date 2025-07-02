@@ -15,11 +15,14 @@ pygame.display.set_caption('Brick Breaker')
 VELOCITY_Main = 30
 VELOCITY_X = 0
 SCORE = 0
-ACT_POWERUP = ["Hi"]
-
+ACT_POWERUP = []
+powerup_y_start = min(100, 200) + 400
+LIVES = 3
 player = pdl.paddle(SCREEN_WIDTH,SCREEN_HEIGHT)
 ball = ball.ball(SCREEN_WIDTH,SCREEN_HEIGHT)
 bricks = brick.bricks(SCREEN_WIDTH,SCREEN_HEIGHT)
+
+font = pygame.font.SysFont(None, 48)
 
 while RUNNING:
     clock.tick(FPS)
@@ -45,10 +48,18 @@ while RUNNING:
     ball.move()
 
     if ball.RECT.colliderect(player.rect):
-        if ball.RECT.top < player.rect.bottom or ball.RECT.bottom > player.rect.top:
+        if ball.RECT.bottom > player.rect.top:
             ball.flip_vertically()
-        else:
+            ball.RECT.bottom = player.rect.top 
+        elif ball.RECT.top > player.rect.bottom:
             ball.flip_vertically()
+            ball.RECT.top = player.rect.bottom
+        elif ball.RECT.left > player.rect.right:
+            ball.flip_horizontally()
+            ball.RECT.left = player.rect.right
+        elif ball.RECT.right > player.rect.left:
+            ball.flip_horizontally()
+            ball.RECT.right = player.rect.left
     if ball.RECT.left < 0:
         ball.RECT.left = 0
         ball.flip_horizontally()
@@ -59,7 +70,8 @@ while RUNNING:
         ball.RECT.top = 0
         ball.flip_vertically()
     if ball.RECT.bottom > SCREEN_HEIGHT:
-        RUNNING = False
+        LIVES -= 1
+        ball.flip_vertically()
 
     for brick in bricks.bricks:
         if brick["active"] and ball.RECT.colliderect(brick["rect"]):
@@ -74,21 +86,22 @@ while RUNNING:
             brick["active"] = False
             SCORE += 10
             if brick["powerup"] != None:
-                ACT_POWERUP.append(brick["powerup"])
-
+                power = brick["powerup"]
+                ACT_POWERUP.append(power)
+                print(power)
     player.draw(DISPLAYSURF)
     ball.draw(DISPLAYSURF)
     bricks.draw(DISPLAYSURF)
     
-    score = pygame.font.SysFont(None, 48)
-    score_label = score.render(f"Score: {SCORE}", True, (255, 255, 255))
+    score_label = font.render(f"Score: {SCORE}", True, (255, 255, 255))
     DISPLAYSURF.blit(score_label, (50, 1000))
     
-    font = pygame.font.SysFont(None, 36)
     for idx, power in enumerate(ACT_POWERUP):
-        label = font.render(f"Powerup: {power}", True, (255, 255, 255))
-        DISPLAYSURF.blit(label, (SCREEN_WIDTH - 500, 1100 + idx * 40))
+        label = font.render(f"{power}", True, (255, 255, 255))
+        DISPLAYSURF.blit(label, (SCREEN_WIDTH - 300, powerup_y_start + idx * 40))
     pygame.display.update()
 
+    if LIVES < 1:
+        RUNNING = False
 pygame.quit()
 exit()
