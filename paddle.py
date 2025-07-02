@@ -15,3 +15,5 @@ class paddle:
     
     def pow_extend(self):
         self.WIDTH *= 1.3
+        self.rect.width = self.WIDTH
+        self.rect.x = self.rect.centerx - self.rect.width // 2
