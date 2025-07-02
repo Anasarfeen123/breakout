@@ -5,8 +5,8 @@ class ball:
         self.RADIUS = 20
         self.X_POS = screen_width // 2
         self.Y_POS = screen_height // 2
-        self.VELOCITY_X = 7
-        self.VELOCITY_Y = 7
+        self.VELOCITY_X = 10
+        self.VELOCITY_Y = 10
         self.COLOR = (255,255,255)
         self.RECT = pygame.Rect(self.X_POS - self.RADIUS, self.Y_POS - self.RADIUS, self.RADIUS * 2, self.RADIUS * 2)
 

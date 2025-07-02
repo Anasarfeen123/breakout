@@ -11,7 +11,13 @@ class bricks:
         self.TOP_MARGIN = 50
         self.color = [(0,255,255),(255,0,255),(255,255,0)]
         self.bricks = []
-        self.powerups = ["2balls","speeddown","extralife"]
+        self.powerups = ["2+b","spdn","1+lf"] 
+        '''
+        2+b = 2 + no of Balls
+        spdn = Speed Down
+        1+lf = 1 extra life
+        '''
+
 
         for row in range(self.ROWS):
             for col in range(self.COLS):

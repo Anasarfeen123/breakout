@@ -1,28 +1,57 @@
-import pygame
+import pygame, time
 import paddle as pdl
 import ball
 import brick
 
 pygame.init()
 
+pygame.display.set_caption('Brick Breaker')
+
+clock = pygame.time.Clock()
+
+flash_message = ""
+flash_timer = 0
+
 DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 FPS = 60
-clock = pygame.time.Clock()
 RUNNING = True
+
 SCREEN_WIDTH = DISPLAYSURF.get_width()
 SCREEN_HEIGHT = DISPLAYSURF.get_height()
-pygame.display.set_caption('Brick Breaker')
-VELOCITY_Main = 30
+
+VELOCITY_MAIN = 30
 VELOCITY_X = 0
+BALL_ON_PADDLE = True
+
 SCORE = 0
-ACT_POWERUP = []
-powerup_y_start = min(100, 200) + 400
 LIVES = 3
+ACT_POWERUP = []
+
+
+
+POWERUP_Y_START = min(100, 200) + 400
+FONT = pygame.font.SysFont(None, 48)
+
 player = pdl.paddle(SCREEN_WIDTH,SCREEN_HEIGHT)
 ball = ball.ball(SCREEN_WIDTH,SCREEN_HEIGHT)
 bricks = brick.bricks(SCREEN_WIDTH,SCREEN_HEIGHT)
 
-font = pygame.font.SysFont(None, 48)
+active_effects = {}
+
+def powerup_activater():
+    global LIVES, flash_message, flash_timer
+    new_powerups = ACT_POWERUP.copy()
+    ACT_POWERUP.clear()
+    for powerup in new_powerups:
+        flash_message = f"{powerup} activated!"
+        flash_timer = time.time()
+        if powerup == "1+lf":
+            LIVES += 1
+        elif powerup == "spdn":
+            active_effects["spdn"] = time.time()
+        elif powerup == "2+b":
+            # more ball logic
+            pass
 
 while RUNNING:
     clock.tick(FPS)
@@ -32,46 +61,61 @@ while RUNNING:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 RUNNING = False
+            if event.key == pygame.K_SPACE and BALL_ON_PADDLE:
+                BALL_ON_PADDLE = False
+    if BALL_ON_PADDLE:
+        ball.RECT.centerx = player.rect.centerx
+        ball.RECT.bottom = player.rect.top
     keys = pygame.key.get_pressed()
+    powerup_activater()
     VELOCITY_X = 0
     if keys[pygame.K_LEFT]:
-        VELOCITY_X = -VELOCITY_Main
+        VELOCITY_X = -VELOCITY_MAIN
     if keys[pygame.K_RIGHT]:
-        VELOCITY_X = VELOCITY_Main
+        VELOCITY_X = VELOCITY_MAIN
     player.rect.x += VELOCITY_X
     if player.rect.left < 0:
         player.rect.left = 0
     if player.rect.right > SCREEN_WIDTH:
         player.rect.right = SCREEN_WIDTH
     DISPLAYSURF.fill((0, 0, 0))
-    
-    ball.move()
 
-    if ball.RECT.colliderect(player.rect):
-        if ball.RECT.bottom > player.rect.top:
-            ball.flip_vertically()
-            ball.RECT.bottom = player.rect.top 
-        elif ball.RECT.top > player.rect.bottom:
-            ball.flip_vertically()
-            ball.RECT.top = player.rect.bottom
-        elif ball.RECT.left > player.rect.right:
-            ball.flip_horizontally()
-            ball.RECT.left = player.rect.right
-        elif ball.RECT.right > player.rect.left:
-            ball.flip_horizontally()
-            ball.RECT.right = player.rect.left
+    
+    if "spdn" in active_effects:
+        if time.time() - active_effects["spdn"] < 10:
+            ball.VELOCITY_X = 5
+            ball.VELOCITY_Y = 5
+        else:
+            ball.VELOCITY_X = 10
+            ball.VELOCITY_Y = 10
+            del active_effects["spdn"]
+
+    if not BALL_ON_PADDLE:
+        ball.move()
+
+
+    if ball.RECT.colliderect(player.rect) and ball.VELOCITY_Y > 0:
+        ball.VELOCITY_Y *= -1
+        offset = (ball.RECT.centerx - player.rect.centerx) / (player.rect.width / 2)
+        ball.VELOCITY_X += offset * 2 
+        
+        ball.RECT.bottom = player.rect.top
+    
     if ball.RECT.left < 0:
         ball.RECT.left = 0
         ball.flip_horizontally()
+
     if ball.RECT.right > SCREEN_WIDTH:
         ball.RECT.right = SCREEN_WIDTH
         ball.flip_horizontally()
+
     if ball.RECT.top <= 0:
         ball.RECT.top = 0
         ball.flip_vertically()
+
     if ball.RECT.bottom > SCREEN_HEIGHT:
         LIVES -= 1
-        ball.flip_vertically()
+        BALL_ON_PADDLE = True
 
     for brick in bricks.bricks:
         if brick["active"] and ball.RECT.colliderect(brick["rect"]):
@@ -93,15 +137,25 @@ while RUNNING:
     ball.draw(DISPLAYSURF)
     bricks.draw(DISPLAYSURF)
     
-    score_label = font.render(f"Score: {SCORE}", True, (255, 255, 255))
+    score_label = FONT.render(f"Score: {SCORE}", True, (255, 255, 255))
     DISPLAYSURF.blit(score_label, (50, 1000))
+    lives_label = FONT.render(f"Lives: {LIVES}", True, (255, 0, 0))
+    DISPLAYSURF.blit(lives_label, (SCREEN_WIDTH - 200, 50))
+
+    for idx, (effect, start_time) in enumerate(active_effects.items()):
+        remaining = max(0, int(10 - (time.time() - start_time)))
+        label = FONT.render(f"{effect} ({remaining}s)", True, (255, 255, 255))
+        DISPLAYSURF.blit(label, (SCREEN_WIDTH - 300, POWERUP_Y_START + idx * 40))
     
-    for idx, power in enumerate(ACT_POWERUP):
-        label = font.render(f"{power}", True, (255, 255, 255))
-        DISPLAYSURF.blit(label, (SCREEN_WIDTH - 300, powerup_y_start + idx * 40))
-    pygame.display.update()
+
 
     if LIVES < 1:
+        game_over_text = FONT.render("Game Over!", True, (255, 0, 0))
+        DISPLAYSURF.blit(game_over_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2))
+        pygame.display.update()
+        time.sleep(2)
         RUNNING = False
+
+    pygame.display.update()
 pygame.quit()
 exit()
