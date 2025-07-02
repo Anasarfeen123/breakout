@@ -12,8 +12,3 @@ class paddle:
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
-    
-    def pow_extend(self):
-        self.WIDTH *= 1.3
-        self.rect.width = self.WIDTH
-        self.rect.x = self.rect.centerx - self.rect.width // 2

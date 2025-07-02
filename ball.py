@@ -9,10 +9,13 @@ class ball:
         self.VELOCITY_Y = 12
         self.COLOR = (255,255,255)
         self.RECT = pygame.Rect(self.X_POS - self.RADIUS, self.Y_POS - self.RADIUS, self.RADIUS * 2, self.RADIUS * 2)
-
+        self.dashing = False
+        
     def draw(self, screen):
         pygame.draw.circle(screen, self.COLOR, self.RECT.center, self.RADIUS)
-    
+        if self.dashing:
+            pygame.draw.circle(screen, (255, 100, 0), self.RECT.center, self.RECT.width // 2 + 5, 2)
+
     def move(self):
         self.RECT.x += self.VELOCITY_X
         self.RECT.y += self.VELOCITY_Y
