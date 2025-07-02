@@ -1,0 +1,43 @@
+Step-by-Step
+
+    Setup Window
+
+        Use pygame.display.set_mode(...)
+
+        Define screen dimensions, FPS
+
+    Create Paddle
+
+        Paddle class with movement via arrow keys
+
+        Clamp position to screen bounds
+
+    Add Ball
+
+        Ball class with velocity
+
+        Bounces off walls and paddle
+
+    Add Bricks
+
+        Grid of colored rectangles
+
+        Remove on collision
+
+    Add Collision Logic
+
+        Ball hits brick → remove brick, bounce
+
+        Ball hits paddle → bounce depending on where it hits
+
+Optional Stretch Features
+
+    Score counter
+
+    Multiple levels
+
+    Power-ups (widen paddle, multi-ball)
+
+    Game over + restart screen
+
+    Sound effects
